@@ -1,0 +1,193 @@
+using System;
+using System.Collections.Generic;
+namespace SistemaFaturacao
+{
+// Classe que representa um cliente
+class Cliente
+{
+public string Nome;
+public string Genero;
+public int Idade;
+public bool Gravida;
+public bool Deficiencia;
+public double ValorCompras;
+public bool Atendido = false;
+// Verificar se o cliente tem prioridade
+public bool TemPrioridade()
+{
+return Gravida || Deficiencia || Idade >= 60;
+}
+}
+class Program
+{
+// Criar duas filas de atendimento
+static Queue<Cliente> filaPrioritaria = new Queue<Cliente>();
+static Queue<Cliente> filaNormal = new Queue<Cliente>();
+// Lista para guardar todos os clientes cadastrados
+static List<Cliente> clientesCadastrados = new List<Cliente>();
+static void Main(string[] args)
+{
+int opcao;
+do
+{
+Console.WriteLine("\n = SISTEMA DE FATURACAO =");
+Console.WriteLine("1 - Registar novo cliente.");
+Console.WriteLine("2 - Atender clientes.");
+Console.WriteLine("3 - Consultar filas.");
+Console.WriteLine("4 - Consultar clientes cadastrados.");
+Console.WriteLine("0 - Sair.");
+Console.Write("Escolha uma opcao para continuar : ");
+opcao = int.Parse(Console.ReadLine());
+switch (opcao)
+{
+case 1:
+RegistarCliente();
+break;
+case 2:
+AtenderCliente();
+break;
+case 3:
+ConsultarFilas();
+break;
+case 4:
+ConsultarClientes();
+break;
+case 0:
+Console.WriteLine("Programa encerrado!");
+break;
+default:
+Console.WriteLine("Opcao invalida!");
+break;
+}
+} while (opcao != 0);
+}
+// Metodo para registar o cliente
+static void RegistarCliente()
+{
+Cliente cliente = new Cliente();
+Console.WriteLine("\n ==Dados do Cliente==");
+Console.Write("Nome do cliente: ");
+cliente.Nome = Console.ReadLine();
+Console.Write("Genero (M/F): ");
+cliente.Genero = Console.ReadLine().ToUpper();
+Console.Write("Idade: ");
+cliente.Idade = int.Parse(Console.ReadLine());
+// Verificar se a cliente esta gravida
+cliente.Gravida = false;
+if (cliente.Genero == "F")
+{
+Console.Write("A cliente esta gravida? (S/N): ");
+cliente.Gravida = Console.ReadLine().ToUpper() == "S";
+}
+// Verificar se possui deficiencia
+Console.Write("Possui alguma deficiencia? (S/N): ");
+cliente.Deficiencia = Console.ReadLine().ToUpper() == "S";
+// Guardar o cliente na lista geral
+clientesCadastrados.Add(cliente);
+// Verificar a prioridade antes do atendimento
+if (cliente.TemPrioridade())
+{
+filaPrioritaria.Enqueue(cliente);
+Console.WriteLine("\nCliente encaminhado para a FILA PRIORITARIA!");
+}
+else{
+filaNormal.Enqueue(cliente);
+Console.WriteLine("\n Cliente encaminhado para a FILA NORMAL!");
+} }
+// Metodo para atender os clientes
+static void AtenderCliente()
+{
+Cliente cliente;
+// Verificar primeiro a fila prioritaria
+if (filaPrioritaria.Count > 0)
+{
+cliente = filaPrioritaria.Dequeue();
+Console.WriteLine("\nAtendimento prioritario!");
+}
+else if (filaNormal.Count > 0)
+{
+cliente = filaNormal.Dequeue();
+Console.WriteLine("\nAtendimento normal!");
+}
+else
+{
+Console.WriteLine("\nNao existem clientes na fila!");
+return;
+}
+// Solicitar o valor das compras
+Console.WriteLine("\n===== FATURACAO =====");
+Console.WriteLine("Cliente: " + cliente.Nome);
+Console.Write("Valor total das compras (Kz): ");
+cliente.ValorCompras = double.Parse(Console.ReadLine());
+double bonus = 0;
+double totalPagar;
+// Verificar se o cliente tem direito ao bonus
+if (cliente.ValorCompras > 100000)
+{
+bonus = cliente.ValorCompras * 0.10;
+Console.WriteLine(" Recebe Bonus de 10% !");
+}
+else{
+Console.WriteLine(" Nao Recebe bonus.");
+}
+// Calcular o valor final
+totalPagar = cliente.ValorCompras - bonus;
+// Marcar o cliente como atendido
+cliente.Atendido = true;
+// Apresentar a fatura
+Console.WriteLine("\n--FATURA DO CLIENTE--");
+Console.WriteLine("Nome: " + cliente.Nome);
+Console.WriteLine("Valor das compras: " + cliente.ValorCompras + " Kz");
+Console.WriteLine("Bonus (10%): " + bonus + " Kz");
+Console.WriteLine("TOTAL A PAGAR: " + totalPagar + " Kz");
+Console.WriteLine("\nAtendimento concluido!");
+}
+// Metodo para consultar as filas
+static void ConsultarFilas()
+{
+Console.WriteLine("\n <---VAI PARA A FILA PRIORITARIA.");
+if (filaPrioritaria.Count == 0)
+{
+Console.WriteLine("Nao existem clientes.");
+}
+else{
+foreach (Cliente c in filaPrioritaria)
+{
+Console.WriteLine(c.Nome);
+}
+}
+Console.WriteLine("\n <--VAI PARA A FILA NORMAL. ");
+if (filaNormal.Count == 0)
+{
+Console.WriteLine("Nao existem clientes.");
+}
+else
+{
+foreach (Cliente c in filaNormal)
+{
+Console.WriteLine(c.Nome);
+} } }
+// :Consultar todos os clientes cadastrados
+static void ConsultarClientes()
+{
+Console.WriteLine("\n --- CLIENTES CADASTRADOS ---");
+if (clientesCadastrados.Count == 0)
+{Console.WriteLine("Ainda nao existem clientes cadastrados.");
+}
+else{
+foreach (Cliente c in clientesCadastrados){
+Console.WriteLine("--------------------------------");
+Console.WriteLine("Nome: " + c.Nome);
+Console.WriteLine("Genero: " + c.Genero);
+Console.WriteLine("Idade: " + c.Idade);
+Console.WriteLine("Situacao: " +
+(c.Atendido ? "Atendido" : "Aguardando atendimento"));
+Console.WriteLine("Prioridade: " +
+(c.TemPrioridade() ? "Sim" : "Nao"));
+Console.WriteLine("Valor das compras: " +
+c.ValorCompras + " Kz");
+}
+Console.WriteLine("--------------------------------");
+Console.WriteLine("Total de clientes cadastrados: " +
+clientesCadastrados.Count);
+} } } }
